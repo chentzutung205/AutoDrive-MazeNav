@@ -20,9 +20,11 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+        	'camera_testing=bb8_final.camera_testing:main',
         	'trained_knn=bb8_final.trained_knn:main',
-        	'get_object_range=bb8_chase_object.get_object_range:main',
-        	'chase_object=bb8_chase_object.chase_object:main'
+        	'surrounding=bb8_final.surrounding:main',
+        	'frontal_viewer=bb8_final.frontal_viewer:main',
+        	'controller=bb8_final.controller:main',
         ],
     },
 )

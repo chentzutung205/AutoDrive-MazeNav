@@ -1,13 +1,12 @@
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import CompressedImage
-from std_msgs.msg import Float32
+from std_msgs.msg import String
 from rclpy.qos import QoSProfile, QoSDurabilityPolicy, QoSReliabilityPolicy, QoSHistoryPolicy
 from cv_bridge import CvBridge
 
 import cv2
 import numpy as np
-from sklearn.metrics import confusion_matrix, accuracy_score
 import joblib
 
 
@@ -16,7 +15,7 @@ lower_color = np.array([0, 100, 40])
 upper_color = np.array([180, 255, 191])
 
 # load the model from disk
-loaded_model = joblib.load('knn_model.sav')
+loaded_model = joblib.load('/home/ztung/r2_ws/src/bb8_final/bb8_final/knn_model.sav')
 
 
 class KNN(Node):
@@ -39,7 +38,11 @@ class KNN(Node):
         self._image_subscriber  # Prevent unused variable warning
 
         # Publish the label of the sign
-        self.class_publisher = self.create_publisher(Float32, '/sign_class', 10)
+        self.sign_publisher = self.create_publisher(String, '/sign/label', 10)
+        self.sign = String()
+
+        self.timer = self.create_timer(0.5, self.timer_callback)
+
 
 
     # Define the new crop function that uses color thresholding
@@ -85,20 +88,39 @@ class KNN(Node):
 
         # Predict labels using the loaded model
         loaded_predictions = loaded_model.predict(test_data)
-        print("predict: ", loaded_predictions)
+        print("prediction: ", loaded_predictions)
+
+        if loaded_predictions[0] == 1:
+            print('Turn Left!')
+            self.sign.data = 'left'
+        elif loaded_predictions[0] == 2:
+            print('Turn Right!')
+            self.sign.data = 'right'
+        elif loaded_predictions[0] == 3:
+            print('Right Reverse')
+            self.sign.data = 'reverse'
+        elif loaded_predictions[0] == 4:
+            print('Left Reverse!')
+            self.sign.data = 'reverse'
+        elif loaded_predictions[0] == 5:
+            print('Stop!')
+            self.sign.data = 'stop'
+        else:
+            print('Nothing!')
+            self.sign.data = 'empty'
 
         # Calculate accuracy and confusion matrix
-        loaded_accuracy = accuracy_score(test_labels, loaded_predictions)
-        loaded_confusion_matrix = confusion_matrix[(test_labels, loaded_predictions)]
+        # loaded_accuracy = accuracy_score([4], loaded_predictions)
+        # loaded_confusion_matrix = confusion_matrix([[4], loaded_predictions])
 
         # Print the results
-        print(f"Loaded Model Accuracy: {loaded_accuracy}")
-        print(f"Loaded Model Confusion Matrix:\n{loaded_confusion_matrix}")
+        # print(f"Loaded Model Accuracy: {loaded_accuracy}")
+        # print(f"Loaded Model Confusion Matrix:\n{loaded_confusion_matrix}")
 
         # Publish the predicted label
-        msg = Float32()
-        msg.data = float(loaded_predictions[0])  # Assuming one prediction
-        self.class_publisher.publish(msg)
+
+    def timer_callback(self):
+        self.sign_publisher.publish(self.sign)
 
 
 def main(args=None):
