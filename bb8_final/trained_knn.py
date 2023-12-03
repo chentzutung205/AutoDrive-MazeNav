@@ -15,7 +15,7 @@ lower_color = np.array([0, 100, 40])
 upper_color = np.array([180, 255, 191])
 
 # load the model from disk
-loaded_model = joblib.load('/home/ztung/r2_ws/src/bb8_final/bb8_final/knn_model.sav')
+loaded_model = joblib.load('/home/ztung/r2_ws/src/bb8_final/bb8_final/knn_model_1200.sav')
 
 
 class KNN(Node):
@@ -88,7 +88,7 @@ class KNN(Node):
 
         # Predict labels using the loaded model
         loaded_predictions = loaded_model.predict(test_data)
-        print("prediction: ", loaded_predictions)
+        print("predicted label: ", loaded_predictions)
 
         if loaded_predictions[0] == 1:
             print('Turn Left!')
@@ -97,10 +97,10 @@ class KNN(Node):
             print('Turn Right!')
             self.sign.data = 'right'
         elif loaded_predictions[0] == 3:
-            print('Right Reverse')
+            print('Reverse')
             self.sign.data = 'reverse'
         elif loaded_predictions[0] == 4:
-            print('Left Reverse!')
+            print('Reverse!')
             self.sign.data = 'reverse'
         elif loaded_predictions[0] == 5:
             print('Stop!')
@@ -109,17 +109,9 @@ class KNN(Node):
             print('Nothing!')
             self.sign.data = 'empty'
 
-        # Calculate accuracy and confusion matrix
-        # loaded_accuracy = accuracy_score([4], loaded_predictions)
-        # loaded_confusion_matrix = confusion_matrix([[4], loaded_predictions])
-
-        # Print the results
-        # print(f"Loaded Model Accuracy: {loaded_accuracy}")
-        # print(f"Loaded Model Confusion Matrix:\n{loaded_confusion_matrix}")
-
-        # Publish the predicted label
 
     def timer_callback(self):
+        # Publish the predicted label
         self.sign_publisher.publish(self.sign)
 
 

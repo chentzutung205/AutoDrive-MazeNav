@@ -1,4 +1,4 @@
-# Find wall around robot (114 degrees)
+# This node is to find walls around the robot (range within 114 degrees)
 
 import rclpy
 from rclpy.node import Node
@@ -12,10 +12,11 @@ import numpy as np
 class getWallRange(Node):
 
     def __init__(self):
-        super().__init__('getWallRange')
+        super().__init__('get_wall_range')
 
         image_qos_profile = QoSProfile(
             reliability=QoSReliabilityPolicy.BEST_EFFORT,
+            history=QoSHistoryPolicy.KEEP_LAST,
             durability=QoSDurabilityPolicy.VOLATILE,
             depth=10
         )
@@ -27,22 +28,18 @@ class getWallRange(Node):
         self.lidar_subscriber
 
         self.wall_publisher = self.create_publisher(Point, '/wall/position',10)
-        self.wall_publisher
+        # Initialize
+        self.wall_position = Point()
 
         # Create a timer
         self.timer = self.create_timer(1.0/2.5, self.timer_callback)
 
-        # Initialize
-        self.wall_position = Point()
-
 
     def timer_callback(self):
         self.wall_publisher.publish(self.wall_position)
-        #self.get_logger().info('Published object : d= %3.0f', theta= %3.0f %(self.wall_position.y, self.wall_position.z))
 
 
     def lidar_callback(self, LaserScan):
-
         self.wall_position.y = 0.0
         self.wall_position.z = 0.0
 
@@ -62,30 +59,29 @@ class getWallRange(Node):
             start_index = indices[0]
         else:
             start_index = 0
+        
         wall_angle = start_index * LaserScan.angle_increment
-
 
         if (LaserScan.range_min <= wall_distance and wall_distance <= LaserScan.range_max):
             self.wall_position.y = wall_distance
-            # convert clockwise 0 to 2pi lidar angles to clockwise -pi to pi angles
-            if wall_angle>np.pi:
+            
+            # Beware of angle! Convert clockwise 0 to 2pi lidar angles to clockwise -pi to pi lidar angles
+            if wall_angle > np.pi:
                 wall_angle = -(2*np.pi - wall_angle)
             else:
                 wall_angle = wall_angle
 
             self.wall_position.z = wall_angle
 
-        print("Wall angle= ", self.wall_position.z)
-        print("Wall distance= ", self.wall_position.y)
-
-
+        print("Wall angle = ", self.wall_position.z)
+        print("Wall distance = ", self.wall_position.y)
 
 
 def main():
     rclpy.init()
-    wall_ranger = getWallRange()
-    rclpy.spin(wall_ranger)
-    wall_ranger.destroy_node()
+    get_wall_range = getWallRange()
+    rclpy.spin(get_wall_range)
+    get_wall_range.destroy_node()
     rclpy.shutdown()
 
 

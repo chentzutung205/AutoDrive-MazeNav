@@ -86,7 +86,7 @@ def process_images(image_paths, image_directory, lower_color, upper_color, save_
 
 
 # Path for the image directory and the label file
-image_directory = './2023Fimgs/'
+image_directory = './images/'
 label_file = 'labels.txt'
 save_directory = './processed_images/'
 
@@ -130,7 +130,7 @@ print(f"Best Confusion matrix: \n{confusion_matrix}")
 
 
 # save the model to disk using joblib
-filename = 'knn_model.sav'
+filename = 'knn_model_1200.sav'
 joblib.dump(knn, filename, compress=3)
 
 
