@@ -128,11 +128,11 @@ class followSign(Node):
 
 
     def go_straight(self):
-        if self.obstacle.y == 0.0:
-            self.obstacle.y = 0.5
+        if self.object.y == 0.0:
+            self.object.y = 0.5
 
         # Go straight until a wall is found
-        error = self.obstacle.y - 0.43
+        error = self.object.y - 0.43
         self.velocity.linear.x = min(error*self.distance_kp, self.lin_limit)
         self.velocity.angular.z = 0.0
 
@@ -148,7 +148,7 @@ class followSign(Node):
             self.velocity.angular.z = 0.0
 
         # If an object is found, stop and detect sign
-        if abs(self.obstacle.y) < 0.45:
+        if abs(self.object.y) < 0.45:
             self.velocity.linear.x = 0.0
             self.velocity.angular.z = 0.0
             self.state = "KNN"
@@ -211,7 +211,7 @@ class followSign(Node):
     def turn_right(self):
         # reset LOST state counter
         self.times_lost = 0
-        # define goal angle 90deg to right and turn
+        # define goal angle 90 deg to right and turn
         self.goalAng = self.prevAng - np.pi/2
         error = self.angle_wrap(self.goalAng-self.globalAng)
         if error > self.theta_envelope:
@@ -227,7 +227,7 @@ class followSign(Node):
     def turn_around(self):
         # reset LOST state counter
         self.times_lost = 0
-        #define goal angle 180deg to left and turn
+        # define goal angle 180 deg to right and turn
         self.goalAng = self.prevAng + np.pi
         error = self.angle_wrap(self.goalAng-self.globalAng)
         if error > self.theta_envelope:
@@ -235,7 +235,7 @@ class followSign(Node):
         elif error < -self.theta_envelope:
             self.velocity.angular.z = max(error*self.theta_kp, -self.ang_limit)
         else:
-            #turn complete now go straight
+            # turn complete now go straight
             self.velocity.angular.z = 0.0
             self.state = "JustGO"
             self.prevAng = self.globalAng
@@ -243,7 +243,7 @@ class followSign(Node):
     def info_update(self):
 
         print("state: ", self.state)
-        print("front wall distance: ", self.obstacle.y)
+        print("front wall distance: ", self.object.y)
         print("sign: ", self.sign)
         print("nearest wall distance: ", self.wall.y)
 
@@ -258,7 +258,7 @@ class followSign(Node):
         orientation = np.arctan2(2*(q.w*q.z+q.x*q.y),1-2*(q.y*q.y+q.z*q.z))
 
         if self.Init:
-            #The initial data is stored to by subtracted to all the other values as we want to start at position (0,0) and orientation 0
+            # The initial data is stored to by subtracted to all the other values as we want to start at position (0,0) and orientation 0
             self.Init = False
             self.Init_ang = orientation
             self.globalAng = self.Init_ang
@@ -268,7 +268,7 @@ class followSign(Node):
             self.Init_pos.z = position.z
         Mrot = np.matrix([[np.cos(self.Init_ang), np.sin(self.Init_ang)],[-np.sin(self.Init_ang), np.cos(self.Init_ang)]])
 
-        #We subtract the initial values
+        # We subtract the initial values
         self.globalPos.x = Mrot.item((0,0))*position.x + Mrot.item((0,1))*position.y - self.Init_pos.x
         self.globalPos.y = Mrot.item((1,0))*position.x + Mrot.item((1,1))*position.y - self.Init_pos.y
         self.globalAng = orientation - self.Init_ang
@@ -280,8 +280,8 @@ class followSign(Node):
         self.wall = Point
 
 
-    def update_obstacle(self, Point):
-        self.obstacle = Point
+    def update_object(self, Point):
+        self.object = Point
 
 
     def update_sign(self, sign):
