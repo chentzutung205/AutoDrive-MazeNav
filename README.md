@@ -35,7 +35,11 @@ This node uses a trained kNN model to classify signs in real-time.
 
 This node uses LIDAR data to detect obstacles in front of the robot within a 5-degree field of view.
 
-**4. controller**
+**4. surrounding**
+
+This node detects walls within a 114-degree field of view using LIDAR.
+
+**5. controller**
 
 This node implements a state machine to follow signs and navigate the maze.
 
@@ -44,14 +48,12 @@ This node implements a state machine to follow signs and navigate the maze.
 2. Ensure all dependencies are installed.
 3. Build the package using `colcon build`.
 4. Source your workspace.
-5. Running the simulation.
-6. Run the nodes using:
+5. Run the nodes using:
 ```
-ros2 run bb8_navigation test.py
-ros2 run bb8_navigation navigate.py
+ros2 launch bb8_final launch_final.py
 ```
-7. Navigate through waypoints using RViz or command line.
 
 ## Tips
+- Use Gazebo for debugging before testing on the physical robot.
 - Train the classifier with additional images for better accuracy.
 - Introduce delays between navigation steps to improve recognition.
